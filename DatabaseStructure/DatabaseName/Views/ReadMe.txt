@@ -1,0 +1,1 @@
+Currently views are not handled directly like this. I personally use dbDeploy scripts to manage it. 
