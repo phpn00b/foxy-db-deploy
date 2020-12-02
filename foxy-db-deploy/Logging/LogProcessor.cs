@@ -36,13 +36,14 @@ namespace foxy_db_deploy.Logging
 				Thread.Sleep(2);
 				return;
 			}
-			/*
+			//*
 			Console.WriteLine($"{source}: {details}");
 			if (attachment != null)
 			{
 				Console.WriteLine($"  {attachment}");
 				Console.WriteLine();
-			}*/
+			}
+			//*/
 
 			_logEntries.Add(log);
 		}

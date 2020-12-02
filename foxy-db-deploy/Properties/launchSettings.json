@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "foxy-db-deploy": {
+      "commandName": "Project",
+      "commandLineArgs": " \"(local)\" ZafiCentral \"sa\" \"Omega321!\" C:\\Source\\Repos\\POS\\trunk\\Database\\"
+    }
+  }
+}

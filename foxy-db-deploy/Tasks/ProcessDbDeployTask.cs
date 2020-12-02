@@ -42,7 +42,23 @@ ORDER BY
 		public override bool RunTask()
 		{
 			try
-			{
+			{	
+					ExecuteNonQuery(@"IF OBJECT_ID(N'dbo.ChangeLog', N'U') IS NULL
+BEGIN
+	CREATE TABLE [dbo].[ChangeLog](
+		[change_number] [int] NOT NULL,
+		[delta_set] [varchar](10) NOT NULL,
+		[start_dt] [datetime] NOT NULL,
+		[complete_dt] [datetime] NULL,
+		[applied_by] [varchar](100) NOT NULL,
+		[description] [varchar](500) NOT NULL,
+	 CONSTRAINT [PK_ChangeLog] PRIMARY KEY CLUSTERED 
+	(
+		[change_number] ASC,
+		[delta_set] ASC
+	)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+	) ON [PRIMARY]
+END");
 				LoadExistingStoredProcedures();
 				LoadLocalFiles();
 

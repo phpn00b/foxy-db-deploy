@@ -79,8 +79,10 @@ namespace foxy_db_deploy.Tasks
 		{
 			using var connection = CreateConnection();
 			using DbCommand command = CreateRawCommand(connection, query);
-			using IDataReader reader = command.ExecuteReader();
-			return ReadObjectHashes(reader);
+			using (IDataReader reader = command.ExecuteReader())
+			{
+				return ReadObjectHashes(reader);
+			}
 		}
 
 		protected int ExecuteNonQuery(string query)

@@ -65,13 +65,13 @@ I hope that was helpful");
 				Console.WriteLine();
 			}
 
-			string masterConnectionString = $"Data Source={host};Initial Catalog=master;Integrated Security=True;MultipleActiveResultSets=True;Application Name=Database Maintenance;";
-			string primaryDatabaseConnectionString = $"Data Source={host};Initial Catalog={dbName};Integrated Security=True;MultipleActiveResultSets=True;Application Name=Database Maintenance;";
+			string masterConnectionString = $"Data Source={host};Initial Catalog=master;Integrated Security=True;MultipleActiveResultSets=False;Application Name=Database Maintenance;";
+			string primaryDatabaseConnectionString = $"Data Source={host};Initial Catalog={dbName};Integrated Security=True;MultipleActiveResultSets=False;Application Name=Database Maintenance;";
 
 			if (!string.IsNullOrWhiteSpace(user) && !string.IsNullOrWhiteSpace(pass))
 			{
-				masterConnectionString = $"Data Source={host};Initial Catalog=master;uid={user};pwd={pass};MultipleActiveResultSets=True;Application Name=Database Maintenance;";
-				primaryDatabaseConnectionString = $"Data Source={host};Initial Catalog={dbName};uid={user};pwd={pass};MultipleActiveResultSets=True;Application Name=Database Maintenance;";
+				masterConnectionString = $"Data Source={host};Initial Catalog=master;uid={user};pwd={pass};MultipleActiveResultSets=False;Application Name=Database Maintenance;";
+				primaryDatabaseConnectionString = $"Data Source={host};Initial Catalog={dbName};uid={user};pwd={pass};MultipleActiveResultSets=False;Application Name=Database Maintenance;";
 				Console.WriteLine("using credential format");
 			}
 
