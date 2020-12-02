@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using foxy_db_deploy.Model;
 
 namespace foxy_db_deploy.Tasks
 {
@@ -24,19 +25,7 @@ FROM
 WHERE 
 	type_desc like '%function%'";
 
-		public class StoredProcedure
-		{
-			public string Schema { get; set; }
 
-			public string SchemaStoredProcedureName { get; set; }
-
-			public string StoredProcedureName { get; set; }
-
-			public DateTime CreatedDate { get; set; }
-
-			public DateTime LastAlteredDate { get; set; }
-			public string FileName => StoredProcedureName + ".sql";
-		}
 
 		private readonly RunDatabaseUpdateTask _task;
 		private readonly string _sprocPath;//= $"{AppDomain.CurrentDomain.BaseDirectory}{Path.DirectorySeparatorChar}data-working{Path.DirectorySeparatorChar}CasinoSystem{Path.DirectorySeparatorChar}Functions";
@@ -93,11 +82,7 @@ WHERE
 					commandText = Regex.Replace(commandText, "create(.*)function", "alter function", RegexOptions.IgnoreCase);
 				}
 
-				int code = 0;
-				using (DbCommand command = Database.GetSqlStringCommand(commandText))
-				{
-					code = Database.ExecuteNonQuery(command);
-				}
+				int code = ExecuteNonQuery(commandText);
 
 				_task._logProcessor.Log(Source, $"finished with {(isNew ? "create" : "alter")} {name} have return code: {code}");
 				//	fileInfo.Delete();
@@ -120,21 +105,19 @@ WHERE
 
 		private void LoadExistingStoredProcedures()
 		{
-			using (DbCommand command = Database.GetSqlStringCommand(ListAllStoredProceduresQuery))
+			using var connection = CreateConnection();
+			using var command = CreateRawCommand(connection, ListAllStoredProceduresQuery);
+			using IDataReader reader = command.ExecuteReader();
+
+			while (reader.Read())
 			{
-				using (IDataReader reader = Database.ExecuteReader(command))
-				{
-					while (reader.Read())
-					{
-						StoredProcedure entity = new StoredProcedure();
-						entity.Schema = DataReaderUtility.GetValue<string>(reader, "Schema");
-						entity.SchemaStoredProcedureName = DataReaderUtility.GetValue<string>(reader, "SchemaStoredProcedureName");
-						entity.StoredProcedureName = DataReaderUtility.GetValue<string>(reader, "StoredProcedureName");
-						entity.CreatedDate = DataReaderUtility.GetValue<DateTime>(reader, "CreatedDate");
-						entity.LastAlteredDate = DataReaderUtility.GetValue<DateTime>(reader, "LastAlteredDate");
-						_existingStoredProcedures.Add(entity);
-					}
-				}
+				StoredProcedure entity = new StoredProcedure();
+				entity.Schema = DataReaderUtility.GetValue<string>(reader, "Schema");
+				entity.SchemaStoredProcedureName = DataReaderUtility.GetValue<string>(reader, "SchemaStoredProcedureName");
+				entity.StoredProcedureName = DataReaderUtility.GetValue<string>(reader, "StoredProcedureName");
+				entity.CreatedDate = DataReaderUtility.GetValue<DateTime>(reader, "CreatedDate");
+				entity.LastAlteredDate = DataReaderUtility.GetValue<DateTime>(reader, "LastAlteredDate");
+				_existingStoredProcedures.Add(entity);
 			}
 		}
 	}

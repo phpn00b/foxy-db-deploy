@@ -28,6 +28,15 @@ select
 
 		public class StoredProcedure
 		{
+			public StoredProcedure(IDataReader reader)
+			{
+				Schema = DataReaderUtility.GetValue<string>(reader, "Schema");
+				SchemaStoredProcedureName = DataReaderUtility.GetValue<string>(reader, "SchemaStoredProcedureName");
+				StoredProcedureName = DataReaderUtility.GetValue<string>(reader, "StoredProcedureName");
+				FullText = DataReaderUtility.GetValue<string>(reader, "FullText");
+				CreatedDate = DataReaderUtility.GetValue<DateTime>(reader, "CreatedDate");
+				LastAlteredDate = DataReaderUtility.GetValue<DateTime>(reader, "LastAlteredDate");
+			}
 			public string Schema { get; set; }
 
 			public string SchemaStoredProcedureName { get; set; }
@@ -58,7 +67,6 @@ select
 				var hash = new SHA1Managed().ComputeHash(Encoding.UTF8.GetBytes(input.ToLower()));
 				return string.Concat(hash.Select(b => b.ToString("x2")));
 			}
-
 		}
 
 		private readonly RunDatabaseUpdateTask _task;
@@ -99,19 +107,6 @@ select
 			return false;
 		}
 
-		private void CopyToPortal(FileInfo fileInfo)
-		{
-			/*
-			try
-			{
-				_task._logProcessor.Log(Source, $"  copy to {PortalPath}{fileInfo.Name}");
-				fileInfo.CopyTo($"{PortalPath}{fileInfo.Name}", true);
-			}
-			catch (Exception e)
-			{
-				_task._logProcessor.Log(Source, "failed with portal copy", attachment: e.ToString());
-			}*/
-		}
 
 		private void ProcessFile(string path)
 		{
@@ -123,7 +118,7 @@ select
 			try
 			{
 				//if (_doPortalCopy)
-				CopyToPortal(fileInfo);
+
 				StoredProcedure existingProcedure = _existingStoredProcedures.FirstOrDefault(o => o.FileName == name);
 				commandText = File.ReadAllText(path);
 				string newHash = string.Empty;
@@ -141,11 +136,7 @@ select
 				}
 				else
 				{
-					int code = 0;
-					using (DbCommand command = Database.GetSqlStringCommand(commandText))
-					{
-						code = Database.ExecuteNonQuery(command);
-					}
+					int code = ExecuteNonQuery(commandText);
 
 					_task._logProcessor.Log(Source, $"finished with {(isNew ? "create" : "alter")} {name} have return code: {code}");
 				}
@@ -169,23 +160,12 @@ select
 
 		private void LoadExistingStoredProcedures()
 		{
-			using (DbCommand command = Database.GetSqlStringCommand(ListAllStoredProceduresQuery))
-			{
-				using (IDataReader reader = Database.ExecuteReader(command))
-				{
-					while (reader.Read())
-					{
-						StoredProcedure entity = new StoredProcedure();
-						entity.Schema = DataReaderUtility.GetValue<string>(reader, "Schema");
-						entity.SchemaStoredProcedureName = DataReaderUtility.GetValue<string>(reader, "SchemaStoredProcedureName");
-						entity.StoredProcedureName = DataReaderUtility.GetValue<string>(reader, "StoredProcedureName");
-						entity.FullText = DataReaderUtility.GetValue<string>(reader, "FullText");
-						entity.CreatedDate = DataReaderUtility.GetValue<DateTime>(reader, "CreatedDate");
-						entity.LastAlteredDate = DataReaderUtility.GetValue<DateTime>(reader, "LastAlteredDate");
-						_existingStoredProcedures.Add(entity);
-					}
-				}
-			}
+			using var connection = CreateConnection();
+			using var command = CreateRawCommand(connection, ListAllStoredProceduresQuery);
+			using IDataReader reader = command.ExecuteReader();
+
+			while (reader.Read())
+				_existingStoredProcedures.Add(new StoredProcedure(reader));
 		}
 	}
 }
