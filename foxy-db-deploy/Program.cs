@@ -16,7 +16,8 @@ namespace foxy_db_deploy
 			Console.WriteLine(@"
 example usage: foxy-db-deploy {host} {database}
 If you call it like that it will directly execute.
-I hope that was helpful");
+I hope that was helpful
+foxy-db-deploy {host} {targetDbName} {user} {pass} {baseDatabaseFolder} {sourceDatabaseFolderName}");
 			if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Logs"))
 				Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Logs");
 
@@ -27,6 +28,7 @@ I hope that was helpful");
 			string user = null;
 			string pass = null;
 			string path = null;
+			string folderName = null;
 			if (args != null && args.Length == 2)
 			{
 				host = args[0];
@@ -40,6 +42,16 @@ I hope that was helpful");
 				user = args[2];
 				pass = args[3];
 				path = args[4];
+				skipInput = true;
+			}
+			else if (args.Length == 6)
+			{
+				host = args[0];
+				dbName = args[1];
+				user = args[2];
+				pass = args[3];
+				path = args[4];
+				folderName = args[5];
 				skipInput = true;
 			}
 
@@ -76,7 +88,7 @@ I hope that was helpful");
 			}
 
 			var processor = new LogProcessor();
-			RunDatabaseUpdateTask task = new RunDatabaseUpdateTask(host, dbName, path, processor, path, primaryDatabaseConnectionString);
+			RunDatabaseUpdateTask task = new RunDatabaseUpdateTask(host, dbName, path, processor, path, primaryDatabaseConnectionString,folderName);
 			task.ProcessUpdatePackage();
 		}
 	}

@@ -19,7 +19,7 @@ namespace foxy_db_deploy
 		internal readonly string _useUnzipedFolderPath;
 		internal readonly string _customConnectionString;
 
-		public RunDatabaseUpdateTask(string hostname, string databaseName, string updatePackageLocation, LogProcessor logProcessor, string useUnzipedFolderPath = null, string connectionString = null)
+		public RunDatabaseUpdateTask(string hostname, string databaseName, string updatePackageLocation, LogProcessor logProcessor, string useUnzipedFolderPath = null, string connectionString = null, string folderName = null)
 		{
 			if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Logs"))
 				Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Logs");
@@ -30,14 +30,7 @@ namespace foxy_db_deploy
 			_updatePackageLocation = updatePackageLocation;
 			_useUnzipedFolderPath = useUnzipedFolderPath;
 			_customConnectionString = connectionString;
-			if (databaseName.Contains("CasinoSystem"))
-			{
-				_databaseFolderName = "CasinoSystem";
-			}
-			else
-			{
-				_databaseFolderName = databaseName;
-			}
+			_databaseFolderName = folderName ?? databaseName;
 		}
 
 		public bool ProcessUpdatePackage()
