@@ -14,11 +14,11 @@ namespace foxy_db_deploy.Tasks
 	{
 		private const string ListAllStoredProceduresQuery = @"SELECT
 	CONVERT(INT,cl.change_number) as ChangeNumber,
-	cl.delta_set as DeltaSet
+	right(concat('00000000000000000000', cl.delta_set), 20) as DeltaSet
 FROM
 	dbo.ChangeLog cl
 ORDER BY
-	cl.delta_set,
+	right(concat('00000000000000000000', cl.delta_set), 20),
 	cl.change_number";
 
 
@@ -145,7 +145,7 @@ END");
 				}
 
 				return wrapper;
-			}));
+			}).OrderBy(o=>o.SortString));
 		}
 
 		private void LoadExistingStoredProcedures()

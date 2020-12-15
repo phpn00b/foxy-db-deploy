@@ -12,13 +12,15 @@ namespace foxy_db_deploy.Model
 		public DateTime StartDate { get; set; }
 		public DateTime EndDate { get; set; }
 		public string Description { get; }
+
+		public string SortString => DeltaSet.PadLeft(10, '0') + "-" + ChangeNumber;
 		public ChangeScriptWrapper(string path)
 		{
 			Info = new FileInfo(path);
 			string[] parts = Info.Name.Split('.');
 			ChangeNumber = Convert.ToInt32(parts[0]);
 			parts = path.Split(Path.DirectorySeparatorChar);
-			DeltaSet = parts.Reverse().Skip(1).First();
+			DeltaSet = Convert.ToDecimal(parts.Reverse().Skip(1).First()).ToString("N2");
 			Description = Info.Name;
 		}
 
