@@ -145,7 +145,7 @@ END");
 				}
 
 				return wrapper;
-			}).OrderBy(o=>o.SortString));
+			}).OrderBy(o=>o?.SortString));
 		}
 
 		private void LoadExistingStoredProcedures()
